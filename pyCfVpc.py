@@ -1,0 +1,3 @@
+class pyCfVpc(object):
+    pass
+
