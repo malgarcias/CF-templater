@@ -4,36 +4,46 @@ __version__ = '1.00'
 import argparse
 import socket
 import sys
-import types
-
+import os
+from subprocess import call
 from troposphere import (GetAtt, Output, Parameter,
                          Ref, Tags, Template)
 from troposphere.autoscaling import Metadata
-from troposphere.cloudformation import (Init, InitConfig, InitFile, InitFiles,
-                                        InitService, InitServices)
+
 from troposphere.ec2 import (VPC, Instance, InternetGateway, NetworkAcl,
                              NetworkAclEntry, NetworkInterfaceProperty,
                              PortRange, SecurityGroup, SecurityGroupRule,
                              VPCGatewayAttachment)
-from troposphere.policies import CreationPolicy, ResourceSignal
-t = Template()
+#from troposphere.policies import CreationPolicy, ResourceSignal
 
-t.set_version('2010-09-09')
 
-t.set_description("Service VPC")
-ref_stack_id = Ref('AWS::StackId')
-ref_region = Ref('AWS::Region')
-ref_stack_name = Ref('AWS::StackName')
-parser = argparse.ArgumentParser()
-parser.add_argument('--cidr', '-c', help="VPC CIDR Address Block", type= str)
-parser.add_argument('--environment', '-e', help="Environment Name", type= str)
-args=parser.parse_args()
-if args == None:
-    pass
-#print("***",args)
-cidr_block = args.cidr
-environment = args.environment
-VPC = t.add_resource(
+
+
+
+def make_template():
+    t = Template()
+
+    t.set_version('2010-09-09')
+
+    t.set_description("Service VPC")
+    ref_stack_id = Ref('AWS::StackId')
+    ref_region = Ref('AWS::Region')
+    ref_stack_name = Ref('AWS::StackName')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--cidr', '-c', help="VPC CIDR Address Block", type= str, required=True)
+    parser.add_argument('--environment', '-e', help="Environment Name", type= str, required=True)
+    parser.add_argument('--port', '-p', help="Inbound ACL port", type= int, default=443)
+    parser.add_argument('--incidr', '-i', help="Inbound ACL CIDR Block", type= str, default='0.0.0.0/0' )
+    parser.add_argument('--outcidr', '-o', help="Outbound ACL CIDR Block", type= str, default='0.0.0.0/0' )
+    args=parser.parse_args()
+    
+    cidr_block = args.cidr
+    environment = args.environment
+    port = args.port
+    incidr = args.incidr
+    outcidr = args.outcidr
+
+    VPCInstance = t.add_resource(
     VPC(
         'VPC',
         CidrBlock=cidr_block,
@@ -43,9 +53,6 @@ VPC = t.add_resource(
             Application=ref_stack_id,
             Name = '{}-ServiceVPC'.format(environment),
             Environment=environment)))
-
-def make_template():
-
    
     internetGateway = t.add_resource(
         InternetGateway(
@@ -58,13 +65,13 @@ def make_template():
     gatewayAttachment = t.add_resource(
         VPCGatewayAttachment(
             'AttachGateway',
-            VpcId=Ref(VPC),
+            VpcId=Ref(VPCInstance),
             InternetGatewayId=Ref(internetGateway)))
 
     networkAcl = t.add_resource(
         NetworkAcl(
             'NetworkAcl',
-            VpcId=Ref(VPC),
+            VpcId=Ref(VPCInstance),
             Tags=Tags(
                 Name='{}-NetworkAcl'.format(environment),
                 Environment=environment,
@@ -76,10 +83,10 @@ def make_template():
             NetworkAclId=Ref(networkAcl),
             RuleNumber='100',
             Protocol='6',
-            PortRange=PortRange(To='443', From='443'),
+            PortRange=PortRange(To=port, From=port),
             Egress='false',
             RuleAction='allow',
-            CidrBlock='0.0.0.0/0',
+            CidrBlock=incidr,
         ))
 
     vpcNetworkAclOutboundRule= t.add_resource(
@@ -90,7 +97,7 @@ def make_template():
             Protocol='6',
             Egress='true',
             RuleAction='allow',
-            CidrBlock='0.0.0.0/0',
+            CidrBlock=outcidr,
         ))
 
     t.add_output(
@@ -100,4 +107,8 @@ def make_template():
     print(t.to_json())
 
 
-make_template()
+def main():
+    make_template()
+
+if __name__ == "__main__":
+    main()
