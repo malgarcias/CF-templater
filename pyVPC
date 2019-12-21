@@ -11,11 +11,10 @@ from troposphere import (Base64, FindInMap, GetAtt, Join, Output, Parameter,
 from troposphere.autoscaling import Metadata
 from troposphere.cloudformation import (Init, InitConfig, InitFile, InitFiles,
                                         InitService, InitServices)
-from troposphere.ec2 import (EIP, VPC, Instance, InternetGateway, NetworkAcl,
+from troposphere.ec2 import (VPC, Instance, InternetGateway, NetworkAcl,
                              NetworkAclEntry, NetworkInterfaceProperty,
                              PortRange, SecurityGroup, SecurityGroupRule,
-                             SubnetNetworkAclAssociation,
-                             SubnetRouteTableAssociation, VPCGatewayAttachment)
+                             VPCGatewayAttachment)
 from troposphere.policies import CreationPolicy, ResourceSignal
 
 parser = argparse.ArgumentParser()
@@ -24,7 +23,7 @@ parser.add_argument('--environment', '-e', help="Environment Name", type= str)
 args=parser.parse_args()
 if args == None:
     print()
-print("***",args)
+#print("***",args)
 cidr_block = args.cidr
 environment = args.environment
 #cidr_block = '10.0.0.1/16'

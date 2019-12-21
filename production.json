@@ -1,0 +1,122 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Service VPC",
+    "Outputs": {
+        "URL": {
+            "Description": "Newly created application URL",
+            "Value": "Prueba"
+        }
+    },
+    "Resources": {
+        "AttachGateway": {
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::VPCGatewayAttachment"
+        },
+        "InboundHTTPNetworkAclEntry": {
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Egress": "false",
+                "NetworkAclId": {
+                    "Ref": "NetworkAcl"
+                },
+                "PortRange": {
+                    "From": "443",
+                    "To": "443"
+                },
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "RuleNumber": "100"
+            },
+            "Type": "AWS::EC2::NetworkAclEntry"
+        },
+        "InternetGateway": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
+                        }
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": "Development"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "Development-InternetGateway"
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::InternetGateway"
+        },
+        "NetworkAcl": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
+                        }
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": "Development"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "Development-NetworkAcl"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::NetworkAcl"
+        },
+        "OutBoundHTTPNetworkAclEntry": {
+            "Properties": {
+                "CidrBlock": "0.0.0.0/0",
+                "Egress": "true",
+                "NetworkAclId": {
+                    "Ref": "NetworkAcl"
+                },
+                "Protocol": "6",
+                "RuleAction": "allow",
+                "RuleNumber": "200"
+            },
+            "Type": "AWS::EC2::NetworkAclEntry"
+        },
+        "VPC": {
+            "Properties": {
+                "CidrBlock": "10.2.0.1/18",
+                "EnableDnsHostnames": "true",
+                "EnableDnsSupport": "true",
+                "Tags": [
+                    {
+                        "Key": "Application",
+                        "Value": {
+                            "Ref": "AWS::StackId"
+                        }
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": "Development"
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": "Test-ServiceVPC"
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::VPC"
+        }
+    }
+}
