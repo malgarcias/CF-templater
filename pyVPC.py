@@ -14,13 +14,12 @@ from troposphere.ec2 import (VPC, Instance, InternetGateway, NetworkAcl,
                              NetworkAclEntry, NetworkInterfaceProperty,
                              PortRange, SecurityGroup, SecurityGroupRule,
                              VPCGatewayAttachment)
-#from troposphere.policies import CreationPolicy, ResourceSignal
 
 
 
 
 
-def make_template():
+def make_template(obj):
     t = Template()
 
     t.set_version('2010-09-09')
@@ -29,19 +28,13 @@ def make_template():
     ref_stack_id = Ref('AWS::StackId')
     ref_region = Ref('AWS::Region')
     ref_stack_name = Ref('AWS::StackName')
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--cidr', '-c', help="VPC CIDR Address Block", type= str, required=True)
-    parser.add_argument('--environment', '-e', help="Environment Name", type= str, required=True)
-    parser.add_argument('--port', '-p', help="Inbound ACL port", type= int, default=443)
-    parser.add_argument('--incidr', '-i', help="Inbound ACL CIDR Block", type= str, default='0.0.0.0/0' )
-    parser.add_argument('--outcidr', '-o', help="Outbound ACL CIDR Block", type= str, default='0.0.0.0/0' )
-    args=parser.parse_args()
+ 
     
-    cidr_block = args.cidr
-    environment = args.environment
-    port = args.port
-    incidr = args.incidr
-    outcidr = args.outcidr
+    cidr_block = obj.vpc_cidr
+    environment = obj.environment
+    port = obj.port
+    incidr = obj.incidr
+    outcidr = obj.outcidr
 
     VPCInstance = t.add_resource(
     VPC(
