@@ -1,4 +1,5 @@
 import argparse
+import ipaddress
 import pyVPC
 
 class pyCfVpc:
@@ -20,3 +21,10 @@ if __name__ == '__main__':
     args=parser.parse_args()
     v = pyCfVpc(args.cidr, args.environment, args.port, args.incidr, args.outcidr)
     pyVPC.make_template(v)
+
+#
+def validateCIDR(self):
+    try:
+        ip_addr = ipaddress.ip_address(self.vpc_cidr)
+    except ValueError:
+        return False
