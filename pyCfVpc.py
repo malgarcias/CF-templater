@@ -1,6 +1,10 @@
 import argparse
 import ipaddress
+import socket
+import re
 import pyVPC
+import iptools
+
 
 class pyCfVpc:
     def __init__(self, vpc_cidr, environment, port, incidr, outcidr):
@@ -11,6 +15,8 @@ class pyCfVpc:
         self.incidr = incidr
         self.outcidr = outcidr
 
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--cidr', '-c', help="VPC CIDR Address Block", type= str, required=True)
@@ -19,12 +25,13 @@ if __name__ == '__main__':
     parser.add_argument('--incidr', '-i', help="Inbound ACL CIDR Block", type= str, default='0.0.0.0/0' )
     parser.add_argument('--outcidr', '-o', help="Outbound ACL CIDR Block", type= str, default='0.0.0.0/0' )
     args=parser.parse_args()
-    v = pyCfVpc(args.cidr, args.environment, args.port, args.incidr, args.outcidr)
-    pyVPC.make_template(v)
+    try:
+        iscidr = args.cidr.index('/')
+                
+        v = pyCfVpc(args.cidr, args.environment, args.port, args.incidr, args.outcidr)
+        
+        pyVPC.make_template(v)
+    except:
+        print('Invalid CIDR ')
 
 #
-def validateCIDR(self):
-    try:
-        ip_addr = ipaddress.ip_address(self.vpc_cidr)
-    except ValueError:
-        return False

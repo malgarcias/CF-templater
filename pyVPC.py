@@ -100,8 +100,3 @@ def make_template(obj):
     print(t.to_json())
 
 
-def main():
-    make_template()
-
-if __name__ == "__main__":
-    main()
