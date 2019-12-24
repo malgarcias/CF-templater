@@ -26,7 +26,7 @@ def validate_cidr(cidr):
     z = re.search('^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(3[0-2]|[1-2][0-9]|[0-9]))$',cidr)
     if z:
         return True
-    return False
+    raise ValueError('Invalid CIDR block notation')
 
 
 
@@ -124,5 +124,5 @@ if __name__ == '__main__':
     if validate_cidr(args.cidr):
         v = pyCfVpc(args.cidr, args.environment, args.port, args.incidr, args.outcidr)
         make_template(v)
-    else:
-        print('Invalid CIDR ')
+    
+        
