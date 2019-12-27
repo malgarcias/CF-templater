@@ -8,6 +8,7 @@ from troposphere.ec2 import (VPC, InternetGateway, NetworkAcl,
                              VPCGatewayAttachment)
 
 
+# class to pass in the parameters
 class PyCfVpc:
 
     def __init__(self, vpc_cidr, environment, port, incidr, outcidr):
@@ -21,13 +22,14 @@ class PyCfVpc:
 # CIDR notation validation
 def validate_cidr(cidr):
     match = re.search(
-        '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(3[0-2]|[1-2][0-9]|[0-9]))$',
+        '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(/(3[0-2]|[1-2][0-9]|[0-9]))$',
         cidr)
     if match:
         return True
     raise ValueError('Invalid CIDR block notation')
 
 
+# Main function that creates template from parameters
 def make_template(obj):
     t = Template()
 
@@ -44,7 +46,7 @@ def make_template(obj):
     incidr = obj.incidr
     outcidr = obj.outcidr
 
-    vpcInstance = t.add_resource(
+    vpc_instance = t.add_resource(
         VPC(
             'VPC',
             CidrBlock=cidr_block,
@@ -55,7 +57,7 @@ def make_template(obj):
                 Name='{}-ServiceVPC'.format(environment),
                 Environment=environment)))
 
-    internetGateway = t.add_resource(
+    internet_gateway = t.add_resource(
         InternetGateway(
             'InternetGateway',
             Tags=Tags(
@@ -63,25 +65,25 @@ def make_template(obj):
                 Environment=environment,
                 Name='{}-InternetGateway'.format(environment))))
 
-    gatewayAttachment = t.add_resource(
+    gateway_attachment = t.add_resource(
         VPCGatewayAttachment(
             'AttachGateway',
-            VpcId=Ref(vpcInstance),
-            InternetGatewayId=Ref(internetGateway)))
+            VpcId=Ref(vpc_instance),
+            InternetGatewayId=Ref(internet_gateway)))
 
-    networkAcl = t.add_resource(
+    network_acl = t.add_resource(
         NetworkAcl(
             'NetworkAcl',
-            VpcId=Ref(vpcInstance),
+            VpcId=Ref(vpc_instance),
             Tags=Tags(
                 Name='{}-NetworkAcl'.format(environment),
                 Environment=environment,
                 Application=ref_stack_id),
         ))
-    vpcNetworkAclInboundRule = t.add_resource(
+    vpc_network_acl_inbound_rule = t.add_resource(
         NetworkAclEntry(
             'InboundHTTPNetworkAclEntry',
-            NetworkAclId=Ref(networkAcl),
+            NetworkAclId=Ref(network_acl),
             RuleNumber='100',
             Protocol='6',
             PortRange=PortRange(To=port, From=port),
@@ -90,10 +92,10 @@ def make_template(obj):
             CidrBlock=incidr,
         ))
 
-    vpcNetworkAclOutboundRule = t.add_resource(
+    vpc_network_acl_outbound_rule = t.add_resource(
         NetworkAclEntry(
             'OutBoundHTTPNetworkAclEntry',
-            NetworkAclId=Ref(networkAcl),
+            NetworkAclId=Ref(network_acl),
             RuleNumber='200',
             Protocol='6',
             Egress='true',
@@ -104,10 +106,10 @@ def make_template(obj):
     t.add_output(
         [Output('InternetGateway',
                 Description='InternetGateway',
-                Value=Ref(internetGateway)),
+                Value=Ref(internet_gateway)),
          Output('VPCID',
                 Description='VPCID',
-                Value=Ref(vpcInstance))
+                Value=Ref(vpc_instance))
          ])
 
     return t.to_json()
@@ -122,13 +124,14 @@ def main():
     parser.add_argument('--incidr', '-i', help="Inbound ACL CIDR Block", type=str, default='0.0.0.0/0')
     parser.add_argument('--outcidr', '-o', help="Outbound ACL CIDR Block", type=str, default='0.0.0.0/0')
     args = parser.parse_args()
-    if validate_cidr(args.cidr):
-        try:
+
+    try:
+        if validate_cidr(args.cidr):
             v = PyCfVpc(args.cidr, args.environment, args.port, args.incidr, args.outcidr)
             tplt = make_template(v)
             print(tplt)
-        except ValueError:
-            print('Invalid CIDR block notation')
+    except ValueError:
+        print('Invalid CIDR block notation')
 
 
 if __name__ == '__main__':
