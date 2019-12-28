@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="PyCfVPC-Marcelo-Garcia",
-    version="0.0.1",
+    name="PyVPC-Marcelo-Garcia",
+    version="0.0.2",
     author="Marcelo Garcia",
     author_email="marcelo.garcia@linux.com",
     description="VPC template creator tool",
