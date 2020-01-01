@@ -1,0 +1,11 @@
+2019-12-27 16:44:49,160 INFO Included extra file "/Users/marcelogarcia/repos/templater/gen-config/supervisor-devpi.conf" during parsing
+2019-12-27 16:44:49,160 INFO Increased RLIMIT_NOFILE limit to 1024
+2019-12-27 16:44:49,190 INFO RPC interface 'supervisor' initialized
+2019-12-27 16:44:49,195 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2019-12-27 16:44:49,197 INFO daemonizing the supervisord process
+2019-12-27 16:44:49,199 INFO supervisord started with pid 40664
+2019-12-27 16:44:50,203 INFO spawned: 'devpi-server' with pid 40665
+2019-12-27 16:44:55,838 INFO success: devpi-server entered RUNNING state, process has stayed up for > than 5 seconds (startsecs)
+2019-12-27 20:10:22,930 WARN received SIGTERM indicating exit request
+2019-12-27 20:10:22,935 INFO waiting for devpi-server to die
+2019-12-27 20:10:22,940 INFO stopped: devpi-server (terminated by SIGTERM)

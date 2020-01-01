@@ -4,7 +4,7 @@ import unittest
 sys.path.append('.')
 sys.path.append('..')
 
-import PyCfVpc
+from pyCfVPC_pkg import PyCfVpc
 
 
 class TestPyCfVPC(unittest.TestCase):
